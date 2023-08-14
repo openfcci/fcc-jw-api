@@ -11,36 +11,29 @@ sdk.getV2SitesSite_idMedia({
   site_id: siteId
 })
 .then(({ data }) => {
-  data.media.forEach(async item => {
-    let updatedCustomParams = {
-      requires_authentication: 'true'
-    };
+  data.media.forEach(item => {
 
-    if (item.metadata.custom_params !== null) {
-      const params = item.metadata.custom_params;
-      updatedCustomParams = {
-        ...params,
+    let updatedCustomParams = {
         requires_authentication: 'true'
       };
+    if (item.metadata.custom_params !== null || Object.keys(item.metadata.custom_params).length !== 0){
+      updatedCustomParams = {
+          ...item.metadata.custom_params,
+          requires_authentication: 'true'
+        };
     }
+      sdk.patchV2SitesSite_idMediaMedia_id({
+        metadata: {
+          custom_params: updatedCustomParams
 
-    try {
-      await sdk.patchV2SitesSite_idMediaMedia_id(
-        {
-          metadata: {
-            custom_params: updatedCustomParams
-          }
-        },
-        {
-          site_id: siteId,
-          media_id: item.id
         }
-      );
+      }, {
+        site_id: siteId,
+        media_id: item.id
+      })
 
-      console.log('Custom param updated:', updatedCustomParams);
-    } catch (error) {
-      console.error('Error updating custom params:', error.response.data);
-    }
+    console.log('Custom param setup:', updatedCustomParams);
   });
 })
 .catch(err => console.error(err));
+
